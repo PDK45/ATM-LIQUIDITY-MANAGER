@@ -88,9 +88,18 @@ class SimulationEngine:
             if is_festival: 
                 base_withdraw *= 2.5 # Massive spike for "Shock" demo
             
+            # --- NEW REAL-WORLD EVENTS ---
             if self.next_event == 'STORM':
                 base_withdraw *= 0.2 # 80% Drop
                 base_deposit *= 0.2
+            
+            if self.next_event == 'SALARY_WEEK':
+                base_withdraw *= 1.6 # 60% Spike for salaries
+                base_deposit *= 1.1
+            
+            if self.next_event == 'UNREST':
+                base_withdraw *= 0.05 # Near total freeze
+                base_deposit *= 0.05
             
             withdraw_val = int(base_withdraw)
             deposit_val = int(base_deposit)
@@ -102,7 +111,12 @@ class SimulationEngine:
             # Health decay
             prev_atms = self.data[self.data['ATM_ID'] == atm_id]
             prev_health = prev_atms['Health'].iloc[-1] if not prev_atms.empty else 100
-            new_health = max(40, prev_health - np.random.random() * 0.5) # Slow decay
+            
+            if self.next_event == 'SYSTEM_FAILURE':
+                new_health = 35.0 # Critical failure
+                withdraw_val = 0 # Cannot dispense cash
+            else:
+                new_health = max(40, prev_health - np.random.random() * 0.5) # Slow decay
 
             rev = (withdraw_val // 5000) * 25 + (deposit_val // 5000) * 10
             cost = 500 + (100 - new_health) * 50

@@ -170,8 +170,8 @@ export default function Home() {
             <button
               onClick={() => setIsPlaying(!isPlaying)}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${isPlaying
-                  ? 'bg-[#1c222b] text-white'
-                  : 'bg-[#00d09c] text-[#0b0d10] hover:shadow-[0_0_20px_#00d09c40]'
+                ? 'bg-[#1c222b] text-white'
+                : 'bg-[#00d09c] text-[#0b0d10] hover:shadow-[0_0_20px_#00d09c40]'
                 }`}
             >
               {isPlaying ? <><span className="w-2 h-2 rounded-full bg-[#00d09c] animate-pulse" /> LIVE</> : 'GO LIVE'}
@@ -271,6 +271,46 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* Event Control Center */}
+              <div className="bg-[#12151a] rounded-[32px] p-8 border border-[#ffffff08] relative overflow-hidden">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h3 className="text-xl font-black mb-1">Scenario Simulator</h3>
+                    <p className="text-sm text-[#8b949e]">Inject real-world stressors into the network to test AI resilience</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {[
+                    { id: 'FESTIVAL', label: 'Festival Surge', icon: <Zap size={18} />, color: '#00d09c', desc: 'Withdrawal spike' },
+                    { id: 'STORM', label: 'Natural Storm', icon: <TrendingDown size={18} />, color: '#5367ff', desc: 'Activity drop' },
+                    { id: 'SALARY_WEEK', label: 'Salary Week', icon: <Wallet size={18} />, color: '#ffb33e', desc: 'High demand' },
+                    { id: 'SYSTEM_FAILURE', label: 'System Crash', icon: <AlertTriangle size={18} />, color: '#eb5b5b', desc: 'Mechanical failure' },
+                    { id: 'UNREST', label: 'Social Unrest', icon: <ShieldCheck size={18} />, color: '#8b949e', desc: 'Network freeze' }
+                  ].map((evt) => (
+                    <button
+                      key={evt.id}
+                      onClick={async () => {
+                        await fetch('http://localhost:8000/simulate/event', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ event_type: evt.id })
+                        });
+                        alert(`Scenario queued: ${evt.label}`);
+                      }}
+                      className="group bg-[#1c222b] border border-[#ffffff08] hover:border-[#ffffff15] rounded-2xl p-5 text-left transition-all hover:translate-y-[-4px]"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div style={{ color: evt.color }} className="bg-[#ffffff05] p-2 rounded-xl group-hover:scale-110 transition-transform">{evt.icon}</div>
+                        <div className="h-1.5 w-1.5 rounded-full bg-[#ffffff10]" />
+                      </div>
+                      <p className="text-sm font-black text-white mb-1">{evt.label}</p>
+                      <p className="text-[10px] text-[#8b949e] font-bold uppercase tracking-wider">{evt.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -307,8 +347,8 @@ export default function Home() {
                           <tr key={i} className="hover:bg-[#ffffff02] transition-colors group">
                             <td className="px-10 py-6">
                               <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${r.action.includes('REFILL')
-                                  ? 'bg-[#ffb33e15] text-[#ffb33e] border border-[#ffb33e20]'
-                                  : 'bg-[#5367ff15] text-[#5367ff] border border-[#5367ff20]'
+                                ? 'bg-[#ffb33e15] text-[#ffb33e] border border-[#ffb33e20]'
+                                : 'bg-[#5367ff15] text-[#5367ff] border border-[#5367ff20]'
                                 }`}>
                                 {r.action.replace('_', ' ')}
                               </span>
