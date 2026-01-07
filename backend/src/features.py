@@ -13,7 +13,7 @@ def add_advanced_features(df):
     # 2. ROLLING MEAN: "Average Net Flow of last 3 days" (Short-term Trend)
     df['Net_Flow_Rolling_3'] = df.groupby('ATM_ID')['Net_Cash_Flow'].transform(lambda x: x.rolling(window=3).mean())
     
-    # Drop NaNs created by shifting (First 7 days will be empty)
-    df = df.dropna().reset_index(drop=True)
+    # Fill NaNs created by shifting (First 7 days will be empty)
+    df = df.fillna(0).reset_index(drop=True)
     
     return df

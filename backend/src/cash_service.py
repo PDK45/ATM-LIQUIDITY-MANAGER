@@ -7,7 +7,18 @@ from .optimizer import predict_next_day
 class CashService:
     def __init__(self):
         self.engine = SimulationEngine()
-        self.model = load_model('backend/models/xgb_model.json')
+        
+        # Load or Train Model
+        model_path = 'backend/models/xgb_model.json'
+        try:
+            print("Attempting to load XGBoost model...")
+            self.model = load_model(model_path)
+            print("Model loaded successfully.")
+        except Exception as e:
+            print(f"Model Load Failed: {e}. Retraining on current history...")
+            from .model_trainer import train_model, save_model
+            self.model, mae = train_model(self.engine.data)
+            save_model(self.model, model_path)
         # Default Configuration
         self.config = {
             'risk_tolerance': 'moderate', # aggressive, moderate, conservative

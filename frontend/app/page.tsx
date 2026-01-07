@@ -253,7 +253,20 @@ export default function Home() {
                     <h3 className="text-[#8b949e] text-[10px] font-black uppercase tracking-[0.2em] mb-4">Risk Profile</h3>
                     <div className="space-y-2">
                       {['conservative', 'moderate', 'aggressive'].map((l) => (
-                        <button key={l} className={`w-full flex items-center justify-between px-4 py-4 rounded-xl border transition-all ${status?.config.risk_tolerance === l ? 'bg-[#00d09c0a] border-[#00d09c40] text-white shadow-[0_0_30px_#00d09c05]' : 'bg-[#0b0d10] border-[#ffffff08] text-[#8b949e]'}`}>
+                        <button
+                          key={l}
+                          onClick={async () => {
+                            setProcessing(true);
+                            await fetch('http://localhost:8000/config', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ risk_tolerance: l })
+                            });
+                            await fetchData();
+                            setProcessing(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-4 py-4 rounded-xl border transition-all ${status?.config.risk_tolerance === l ? 'bg-[#00d09c0a] border-[#00d09c40] text-white shadow-[0_0_30px_#00d09c05]' : 'bg-[#0b0d10] border-[#ffffff08] text-[#8b949e]'}`}
+                        >
                           <span className="capitalize text-sm font-black">{l}</span>
                           {status?.config.risk_tolerance === l && <div className="h-2 w-2 rounded-full bg-[#00d09c] ring-4 ring-[#00d09c20]" />}
                         </button>
@@ -295,7 +308,7 @@ export default function Home() {
                         await fetch('http://localhost:8000/simulate/event', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ event_type: evt.id })
+                          body: JSON.stringify({ type: evt.id })
                         });
                         alert(`Scenario queued: ${evt.label}`);
                       }}
