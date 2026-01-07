@@ -527,6 +527,37 @@ export default function Home() {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Daily Transactional Ledger */}
+                            <div className="bg-[#12151a] rounded-[32px] p-8 border border-[#ffffff08]">
+                              <h4 className="text-[10px] font-black text-[#8b949e] uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Database size={14} /> Daily Transactional Ledger</h4>
+                              <div className="overflow-hidden rounded-2xl border border-[#ffffff05]">
+                                <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                                  <table className="w-full text-left border-collapse">
+                                    <thead className="sticky top-0 bg-[#1c222b] z-10">
+                                      <tr>
+                                        <th className="px-6 py-4 text-[10px] font-black text-[#8b949e] uppercase tracking-widest border-b border-[#ffffff08]">Date</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-[#8b949e] uppercase tracking-widest border-b border-[#ffffff08]">Withdrawals</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-[#8b949e] uppercase tracking-widest border-b border-[#ffffff08]">Deposits</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-[#8b949e] uppercase tracking-widest border-b border-[#ffffff08]">Net Flow</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#ffffff05]">
+                                      {atmDetail.transaction_history.slice().reverse().map((tx: any, i: number) => (
+                                        <tr key={i} className="hover:bg-[#ffffff02] transition-colors">
+                                          <td className="px-6 py-4 text-xs font-bold text-white font-mono">{tx.date}</td>
+                                          <td className="px-6 py-4 text-xs font-bold text-[#eb5b5b]">{formatCurrency(tx.withdrawals)}</td>
+                                          <td className="px-6 py-4 text-xs font-bold text-[#00d09c]">{formatCurrency(tx.deposits)}</td>
+                                          <td className={`px-6 py-4 text-xs font-black ${tx.net_flow >= 0 ? 'text-[#00d09c]' : 'text-white'}`}>
+                                            {formatCurrency(tx.net_flow)}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
                           </motion.div>
                         )}
 

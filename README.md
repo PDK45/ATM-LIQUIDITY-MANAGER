@@ -10,7 +10,7 @@
 
 ## ✨ Key Features
 
-### 🎨 Groww-Inspired Premium UI
+### 🎨 Premium UI
 - **Fintech Aesthetics**: A high-contrast, glassmorphism-based design optimized for clarity and performance.
 - **Fluid Animations**: Utilizing `framer-motion` for seamless tab transitions, modal entrances, and real-time data updates.
 - **Responsive Dashboard**: Specialized views for Global Monitoring, Logistics Planning, and Individual Network Status.
@@ -68,4 +68,4 @@ The system uses a **Stateless Data Generator** combined with a **Rolling Persist
 
 ---
 
-### **made by Dharani Krishna**
+### **Developed by Dharani Krishna**
