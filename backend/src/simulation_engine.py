@@ -92,6 +92,21 @@ class SimulationEngine:
                 base_withdraw *= 0.2 # 80% Drop
                 base_deposit *= 0.2
             
+            withdraw_val = int(base_withdraw)
+            deposit_val = int(base_deposit)
+
+            # Denomination logic (matches generator)
+            w100, w500, w2000 = int((withdraw_val*0.3)//100), int((withdraw_val*0.6)//500), int((withdraw_val*0.1)//2000)
+            d100, d500, d2000 = int((deposit_val*0.2)//100), int((deposit_val*0.75)//500), int((deposit_val*0.05)//2000)
+
+            # Health decay
+            prev_atms = self.data[self.data['ATM_ID'] == atm_id]
+            prev_health = prev_atms['Health'].iloc[-1] if not prev_atms.empty else 100
+            new_health = max(40, prev_health - np.random.random() * 0.5) # Slow decay
+
+            rev = (withdraw_val // 5000) * 25 + (deposit_val // 5000) * 10
+            cost = 500 + (100 - new_health) * 50
+
             row = {
                 'Date': new_date,
                 'ATM_ID': atm_id,
@@ -99,21 +114,25 @@ class SimulationEngine:
                 'Is_Weekend': is_weekend,
                 'Is_Payday': is_payday,
                 'Is_Festival': is_festival,
-                'Withdrawals': int(base_withdraw),
-                'Deposits': int(base_deposit),
-                'Net_Cash_Flow': int(base_deposit - base_withdraw)
+                'Withdrawals': withdraw_val,
+                'Deposits': deposit_val,
+                'W_100': w100, 'W_500': w500, 'W_2000': w2000,
+                'D_100': d100, 'D_500': d500, 'D_2000': d2000,
+                'Health': new_health,
+                'Revenue': int(rev),
+                'Cost': int(cost),
+                'Net_Cash_Flow': int(deposit_val - withdraw_val)
             }
             new_rows.append(row)
             
         new_df = pd.DataFrame(new_rows)
         
-        # Merge and re-calculate features (Rolling/Lag needs full history)
-        # We append raw then re-process features. Efficient enough for this scale.
-        # Note: add_advanced_features expects certain columns.
-        # Ideally we'd just append, but we need lag features which depend on history.
-        
-        # Drop old features to avoid dupes/conflicts if we re-run feature eng
-        base_cols = ['Date', 'ATM_ID', 'Location_Type', 'Is_Weekend', 'Is_Payday', 'Is_Festival', 'Withdrawals', 'Deposits', 'Net_Cash_Flow']
+        # Drop old features to avoid dupes/conflicts
+        base_cols = [
+            'Date', 'ATM_ID', 'Location_Type', 'Is_Weekend', 'Is_Payday', 'Is_Festival', 
+            'Withdrawals', 'Deposits', 'W_100', 'W_500', 'W_2000', 'D_100', 'D_500', 'D_2000',
+            'Health', 'Revenue', 'Cost', 'Net_Cash_Flow'
+        ]
         current_clean = self.data[base_cols].copy()
         
         updated_df = pd.concat([current_clean, new_df], ignore_index=True)

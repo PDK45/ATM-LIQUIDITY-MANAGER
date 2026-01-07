@@ -105,30 +105,54 @@ class CashService:
         avg_daily_flow = int(last_30_days['Net_Cash_Flow'].mean())
         total_volume = int(last_30_days['Withdrawals'].sum() + last_30_days['Deposits'].sum())
         
-        # Estimate days until refill needed (simplified logic based on burn rate)
-        # Current 'balance' isn't explicitly tracked in base data, but we can infer relative health
-        # from the Net_Cash_Flow trends. 
-        # In a real system, we'd have a 'Current_Balance' column.
-        # Here we use net_flow as a proxy for 'status'
-        
-        # Identify "Refill" events - sudden large positive jumps in net flow or specific patterns
-        # Since this is a simulation, we'll label entries with massive net positive flow as refills
+        # Financials
+        total_revenue = int(last_30_days['Revenue'].sum())
+        total_cost = int(last_30_days['Cost'].sum())
+        roi = round(((total_revenue - total_cost) / total_cost) * 100, 1) if total_cost > 0 else 0
+
+        # Denomination Mix (Latest)
+        denom_mix = [
+            {"name": "₹100", "value": int(latest['W_100'] + latest['D_100'])},
+            {"name": "₹500", "value": int(latest['W_500'] + latest['D_500'])},
+            {"name": "₹2000", "value": int(latest['W_2000'] + latest['D_2000'])}
+        ]
+
+        # Financial Trend for charts
+        financial_history = []
+        for _, row in last_30_days.iterrows():
+            financial_history.append({
+                "date": str(row['Date'].date()),
+                "revenue": int(row['Revenue']),
+                "cost": int(row['Cost'])
+            })
+
+        # Identify "Refill" events
         refills = []
-        possible_refills = atm_data[atm_data['Net_Cash_Flow'] > 200000] # Threshold for mock refill
+        possible_refills = atm_data[atm_data['Net_Cash_Flow'] > 200000]
         for _, row in possible_refills.tail(5).iterrows():
             refills.append({
                 "date": str(row['Date'].date()),
                 "amount": int(row['Net_Cash_Flow']),
-                "type": "Refill" if row['Net_Cash_Flow'] > 400000 else "Deposit Spike"
+                "type": "Refill" 
             })
+
+        # Derive status from health
+        h = latest['Health']
+        status_str = "OK" if h > 80 else "Caution" if h > 50 else "Critical"
 
         return {
             "atm_id": int(atm_id),
             "location_type": str(latest['Location_Type']),
-            "status": str(latest['Status']),
+            "status": status_str,
+            "health": round(float(latest['Health']), 1),
             "current_net_flow": int(latest['Net_Cash_Flow']),
             "avg_daily_flow": avg_daily_flow,
             "total_30d_volume": total_volume,
+            "total_revenue": total_revenue,
+            "total_cost": total_cost,
+            "roi": roi,
+            "denom_mix": denom_mix,
             "transaction_history": transaction_history,
+            "financial_history": financial_history,
             "refill_history": refills
         }
